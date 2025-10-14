@@ -11,12 +11,14 @@
   "dependencies": {
     "@clerk/clerk-react": "^5.51.0",
     "axios": "^1.12.2",
+    "clsx": "^2.1.1",
     "d3": "^7.9.0",
     "lucide-react": "^0.344.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.22.3",
-    "socket.io-client": "^4.8.1"
+    "socket.io-client": "^4.8.1",
+    "tailwind-merge": "^3.3.1"
   },
   "devDependencies": {
     "@types/d3": "^7.4.3",
