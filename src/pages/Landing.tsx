@@ -107,23 +107,29 @@ export function Landing() {
 
             {/* Auth Buttons */}
             <div className="flex items-center space-x-4">
-              <SignedOut>
-                <SignInButton mode="modal">
-                  <Button variant="ghost" size="sm">
-                    Sign In
-                  </Button>
-                </SignInButton>
-                <SignUpButton mode="modal">
-                  <Button size="sm">
-                    Get Started Free
-                  </Button>
-                </SignUpButton>
-              </SignedOut>
-              <SignedIn>
-                <Button onClick={() => navigate('/dashboard')} size="sm">
-                  Go to Dashboard
-                </Button>
-              </SignedIn>
+  <SignedOut>
+    <SignInButton mode="modal">
+      <button className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+        Sign In
+      </button>
+    </SignInButton>
+    <SignUpButton mode="modal">
+      <button className="px-6 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
+        Get Started Free
+      </button>
+    </SignUpButton>
+  </SignedOut>
+  <SignedIn>
+    <button 
+      onClick={() => navigate('/dashboard')}
+      className="group relative px-6 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+    >
+      <span className="flex items-center">
+        Go to Dashboard
+        <ArrowRight className="ml-1.5 transition-transform group-hover:translate-x-1" size={16} />
+      </span>
+    </button>
+  </SignedIn>
             </div>
           </div>
         </div>
