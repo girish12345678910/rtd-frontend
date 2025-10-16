@@ -79,3 +79,8 @@ export const voteApi = {
 export const authApi = {
   sync: () => api.post('/auth/sync'),
 };
+
+export const aiApi = {
+  generateSummary: (sessionId: string) =>
+    api.post(`/ai/summary/${sessionId}`),
+};

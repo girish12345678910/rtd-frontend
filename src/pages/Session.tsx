@@ -9,6 +9,9 @@ import { formatTime } from '@/lib/utils';
 import { CreateTopicModal } from '@/components/modals/CreateTopicModal';
 import { useSocket } from '@/contexts/SocketContext';
 
+
+
+
 interface Session {
   id: string;
   title: string;
@@ -67,6 +70,16 @@ export function Session() {
   const [localVotes, setLocalVotes] = useState<Record<string, 'YES' | 'NO' | 'ABSTAIN' | null>>({});
   const [showCreateTopic, setShowCreateTopic] = useState(false);
   const [onlineUsers, setOnlineUsers] = useState<Array<{ userId: string; userName: string }>>([]);
+  
+
+
+
+
+
+
+
+
+
 
   // Load session data
   useEffect(() => {
@@ -254,6 +267,9 @@ export function Session() {
     }
   };
 
+
+  
+
   if (loading) {
     return (
       <>
@@ -347,156 +363,161 @@ export function Session() {
           {/* Main Content Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Topics & Voting (Left 2/3) */}
-            <div className="lg:col-span-2 space-y-4">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-                  {session.topics.length > 0 ? 'Active Topics' : 'No Topics Yet'}
-                </h2>
-                <Button size="sm" onClick={() => setShowCreateTopic(true)}>
-                  <Plus size={16} className="mr-2" />
-                  Add Topic
-                </Button>
+<div className="lg:col-span-2 space-y-4">
+  <div className="flex items-center justify-between mb-4">
+    <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+      {session.topics.length > 0 ? 'Active Topics' : 'No Topics Yet'}
+    </h2>
+    <div className="flex items-center space-x-2">
+      
+      
+      <Button size="sm" onClick={() => setShowCreateTopic(true)}>
+        <Plus size={16} className="mr-2" />
+        Add Topic
+      </Button>
+    </div>
+  </div>
+  
+  {session.topics.length === 0 ? (
+    <Card>
+      <CardContent className="py-12 text-center">
+        <p className="text-gray-600 dark:text-gray-400 mb-4">
+          No topics to vote on yet
+        </p>
+        <p className="text-sm text-gray-500 dark:text-gray-500">
+          Click "Add Topic" to create a new voting topic
+        </p>
+      </CardContent>
+    </Card>
+  ) : (
+    session.topics.map((topic) => {
+      const results = getVoteResults(topic);
+      const userVote = localVotes[topic.id];
+
+      return (
+        <Card key={topic.id}>
+          <CardHeader>
+            <CardTitle>{topic.title}</CardTitle>
+            <CardDescription>{topic.description || 'No description'}</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {/* Vote Buttons */}
+            <div className="flex items-center space-x-3">
+              <Button
+                variant={userVote === 'YES' ? 'success' : 'secondary'}
+                size="sm"
+                onClick={() => handleVote(topic.id, 'YES')}
+              >
+                <ThumbsUp size={16} className="mr-2" />
+                Yes
+              </Button>
+              <Button
+                variant={userVote === 'NO' ? 'danger' : 'secondary'}
+                size="sm"
+                onClick={() => handleVote(topic.id, 'NO')}
+              >
+                <ThumbsDown size={16} className="mr-2" />
+                No
+              </Button>
+              <Button
+                variant={userVote === 'ABSTAIN' ? 'primary' : 'ghost'}
+                size="sm"
+                onClick={() => handleVote(topic.id, 'ABSTAIN')}
+              >
+                <MinusCircle size={16} className="mr-2" />
+                Abstain
+              </Button>
+            </div>
+
+            {/* Results Bar Chart */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-gray-600 dark:text-gray-400">Results</span>
+                <span className="text-gray-600 dark:text-gray-400">
+                  {topic.votes.length} votes
+                </span>
               </div>
-              
-              {session.topics.length === 0 ? (
-                <Card>
-                  <CardContent className="py-12 text-center">
-                    <p className="text-gray-600 dark:text-gray-400 mb-4">
-                      No topics to vote on yet
-                    </p>
-                    <p className="text-sm text-gray-500 dark:text-gray-500">
-                      Click "Add Topic" to create a new voting topic
-                    </p>
-                  </CardContent>
-                </Card>
-              ) : (
-                session.topics.map((topic) => {
-                  const results = getVoteResults(topic);
-                  const userVote = localVotes[topic.id];
 
-                  return (
-                    <Card key={topic.id}>
-                      <CardHeader>
-                        <CardTitle>{topic.title}</CardTitle>
-                        <CardDescription>{topic.description || 'No description'}</CardDescription>
-                      </CardHeader>
-                      <CardContent className="space-y-4">
-                        {/* Vote Buttons */}
-                        <div className="flex items-center space-x-3">
-                          <Button
-                            variant={userVote === 'YES' ? 'success' : 'secondary'}
-                            size="sm"
-                            onClick={() => handleVote(topic.id, 'YES')}
-                          >
-                            <ThumbsUp size={16} className="mr-2" />
-                            Yes
-                          </Button>
-                          <Button
-                            variant={userVote === 'NO' ? 'danger' : 'secondary'}
-                            size="sm"
-                            onClick={() => handleVote(topic.id, 'NO')}
-                          >
-                            <ThumbsDown size={16} className="mr-2" />
-                            No
-                          </Button>
-                          <Button
-                            variant={userVote === 'ABSTAIN' ? 'primary' : 'ghost'}
-                            size="sm"
-                            onClick={() => handleVote(topic.id, 'ABSTAIN')}
-                          >
-                            <MinusCircle size={16} className="mr-2" />
-                            Abstain
-                          </Button>
-                        </div>
+              {/* Yes Bar */}
+              <div className="space-y-1">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-success-600 font-medium">Yes</span>
+                  <span className="text-gray-600 dark:text-gray-400">
+                    {results.total > 0
+                      ? ((results.yes / results.total) * 100).toFixed(0)
+                      : 0}
+                    %
+                  </span>
+                </div>
+                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                  <div
+                    className="bg-success-500 h-2 rounded-full transition-all duration-300"
+                    style={{
+                      width: `${
+                        results.total > 0 ? (results.yes / results.total) * 100 : 0
+                      }%`,
+                    }}
+                  />
+                </div>
+              </div>
 
-                        {/* Results Bar Chart */}
-                        <div className="space-y-2">
-                          <div className="flex items-center justify-between text-sm">
-                            <span className="text-gray-600 dark:text-gray-400">Results</span>
-                            <span className="text-gray-600 dark:text-gray-400">
-                              {topic.votes.length} votes
-                            </span>
-                          </div>
+              {/* No Bar */}
+              <div className="space-y-1">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-danger-600 font-medium">No</span>
+                  <span className="text-gray-600 dark:text-gray-400">
+                    {results.total > 0
+                      ? ((results.no / results.total) * 100).toFixed(0)
+                      : 0}
+                    %
+                  </span>
+                </div>
+                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                  <div
+                    className="bg-danger-500 h-2 rounded-full transition-all duration-300"
+                    style={{
+                      width: `${
+                        results.total > 0 ? (results.no / results.total) * 100 : 0
+                      }%`,
+                    }}
+                  />
+                </div>
+              </div>
 
-                          {/* Yes Bar */}
-                          <div className="space-y-1">
-                            <div className="flex items-center justify-between text-xs">
-                              <span className="text-success-600 font-medium">Yes</span>
-                              <span className="text-gray-600 dark:text-gray-400">
-                                {results.total > 0
-                                  ? ((results.yes / results.total) * 100).toFixed(0)
-                                  : 0}
-                                %
-                              </span>
-                            </div>
-                            <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                              <div
-                                className="bg-success-500 h-2 rounded-full transition-all duration-300"
-                                style={{
-                                  width: `${
-                                    results.total > 0 ? (results.yes / results.total) * 100 : 0
-                                  }%`,
-                                }}
-                              />
-                            </div>
-                          </div>
-
-                          {/* No Bar */}
-                          <div className="space-y-1">
-                            <div className="flex items-center justify-between text-xs">
-                              <span className="text-danger-600 font-medium">No</span>
-                              <span className="text-gray-600 dark:text-gray-400">
-                                {results.total > 0
-                                  ? ((results.no / results.total) * 100).toFixed(0)
-                                  : 0}
-                                %
-                              </span>
-                            </div>
-                            <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                              <div
-                                className="bg-danger-500 h-2 rounded-full transition-all duration-300"
-                                style={{
-                                  width: `${
-                                    results.total > 0 ? (results.no / results.total) * 100 : 0
-                                  }%`,
-                                }}
-                              />
-                            </div>
-                          </div>
-
-                          {/* Abstain Bar */}
-                          {results.abstain > 0 && (
-                            <div className="space-y-1">
-                              <div className="flex items-center justify-between text-xs">
-                                <span className="text-gray-600 dark:text-gray-400 font-medium">
-                                  Abstain
-                                </span>
-                                <span className="text-gray-600 dark:text-gray-400">
-                                  {results.total > 0
-                                    ? ((results.abstain / results.total) * 100).toFixed(0)
-                                    : 0}
-                                  %
-                                </span>
-                              </div>
-                              <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                                <div
-                                  className="bg-gray-400 h-2 rounded-full transition-all duration-300"
-                                  style={{
-                                    width: `${
-                                      results.total > 0 ? (results.abstain / results.total) * 100 : 0
-                                    }%`,
-                                  }}
-                                />
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  );
-                })
+              {/* Abstain Bar */}
+              {results.abstain > 0 && (
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-gray-600 dark:text-gray-400 font-medium">
+                      Abstain
+                    </span>
+                    <span className="text-gray-600 dark:text-gray-400">
+                      {results.total > 0
+                        ? ((results.abstain / results.total) * 100).toFixed(0)
+                        : 0}
+                      %
+                    </span>
+                  </div>
+                  <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                    <div
+                      className="bg-gray-400 h-2 rounded-full transition-all duration-300"
+                      style={{
+                        width: `${
+                          results.total > 0 ? (results.abstain / results.total) * 100 : 0
+                        }%`,
+                      }}
+                    />
+                  </div>
+                </div>
               )}
             </div>
+          </CardContent>
+        </Card>
+      );
+    })
+  )}
+</div>
+
 
             {/* Chat Panel (Right 1/3) */}
             <div className="lg:col-span-1">
@@ -565,6 +586,8 @@ export function Session() {
             onSubmit={handleCreateTopic}
           />
         </div>
+
+
       </SignedIn>
     </>
   );

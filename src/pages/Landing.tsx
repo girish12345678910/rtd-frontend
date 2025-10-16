@@ -144,25 +144,35 @@ export function Landing() {
               </p>
               
               <div className="flex flex-col sm:flex-row gap-4 mb-8">
-                <SignedOut>
-                  <SignUpButton mode="modal">
-                    <Button size="lg" className="text-lg px-8 py-6">
-                      Start Free Trial
-                      <ArrowRight className="ml-2" size={20} />
-                    </Button>
-                  </SignUpButton>
-                </SignedOut>
-                <SignedIn>
-                  <Button size="lg" className="text-lg px-8 py-6" onClick={() => navigate('/dashboard')}>
-                    Go to Dashboard
-                    <ArrowRight className="ml-2" size={20} />
-                  </Button>
-                </SignedIn>
-                <Button variant="ghost" size="lg" className="text-lg px-8 py-6">
-                  <Play className="mr-2" size={20} />
-                  Watch Demo
-                </Button>
-              </div>
+  <SignedOut>
+    <SignUpButton mode="modal">
+      <button className="group relative inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-white transition-all duration-300 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl hover:from-blue-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+        <span className="relative z-10 flex items-center">
+          Get Started Free
+          <ArrowRight className="ml-2 transition-transform group-hover:translate-x-1" size={20} />
+        </span>
+        <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 opacity-0 group-hover:opacity-100 blur transition-opacity"></div>
+      </button>
+    </SignUpButton>
+  </SignedOut>
+  <SignedIn>
+    <button 
+      onClick={() => navigate('/dashboard')}
+      className="group relative inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-white transition-all duration-300 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl hover:from-blue-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+    >
+      <span className="relative z-10 flex items-center">
+        Go to Dashboard
+        <ArrowRight className="ml-2 transition-transform group-hover:translate-x-1" size={20} />
+      </span>
+      <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 opacity-0 group-hover:opacity-100 blur transition-opacity"></div>
+    </button>
+  </SignedIn>
+  <button className="group inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 rounded-xl hover:border-blue-500 dark:hover:border-blue-500 transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
+    <Play className="mr-2 group-hover:text-blue-600" size={20} />
+    Watch Demo
+  </button>
+</div>
+
 
               <div className="flex items-center space-x-8 text-sm text-gray-600 dark:text-gray-400">
                 <div className="flex items-center">
