@@ -8,6 +8,8 @@ import { sessionApi, voteApi } from '@/lib/api';
 import { formatTime } from '@/lib/utils';
 import { CreateTopicModal } from '@/components/modals/CreateTopicModal';
 import { useSocket } from '@/contexts/SocketContext';
+import { VideoCall } from '@/components/video/VideoCall';
+import { Video } from 'lucide-react';
 
 
 
@@ -70,6 +72,7 @@ export function Session() {
   const [localVotes, setLocalVotes] = useState<Record<string, 'YES' | 'NO' | 'ABSTAIN' | null>>({});
   const [showCreateTopic, setShowCreateTopic] = useState(false);
   const [onlineUsers, setOnlineUsers] = useState<Array<{ userId: string; userName: string }>>([]);
+  const [showVideoCall, setShowVideoCall] = useState(false);
   
 
 
@@ -371,10 +374,23 @@ export function Session() {
     <div className="flex items-center space-x-2">
       
       
-      <Button size="sm" onClick={() => setShowCreateTopic(true)}>
-        <Plus size={16} className="mr-2" />
-        Add Topic
-      </Button>
+      <div className="flex items-center space-x-2">
+  <Button 
+    size="sm" 
+    variant="ghost"
+    onClick={() => setShowVideoCall(true)}
+  >
+    <Video size={16} className="mr-2" />
+    Join Call
+  </Button>
+  <Button size="sm" onClick={() => setShowCreateTopic(true)}>
+    <Plus size={16} className="mr-2" />
+    Add Topic
+  </Button>
+</div>
+
+
+      
     </div>
   </div>
   
@@ -585,6 +601,16 @@ export function Session() {
             onClose={() => setShowCreateTopic(false)}
             onSubmit={handleCreateTopic}
           />
+
+          {/* Video Call */}
+{showVideoCall && (
+  <VideoCall 
+    sessionId={sessionId!}
+    userName={user?.fullName || user?.primaryEmailAddress?.emailAddress || 'User'}
+    onClose={() => setShowVideoCall(false)} 
+  />
+)}
+
         </div>
 
 
