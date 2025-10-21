@@ -18,7 +18,6 @@
     "d3": "^7.9.0",
     "embla-carousel-react": "^8.6.0",
     "lucide-react": "^0.344.0",
-    "peerjs": "^1.5.5",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.22.3",
