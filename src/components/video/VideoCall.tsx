@@ -17,6 +17,7 @@ export function VideoCall({ sessionId, userName, onClose }: VideoCallProps) {
   const [isAudioOn, setIsAudioOn] = useState(true);
   const [isConnected, setIsConnected] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [error, setError] = useState('');
 
   const localVideoRef = useRef<HTMLVideoElement>(null);
   const remoteVideoRef = useRef<HTMLVideoElement>(null);
@@ -32,7 +33,7 @@ export function VideoCall({ sessionId, userName, onClose }: VideoCallProps) {
 
   const initializePeer = async () => {
     try {
-      // Get local media stream
+      // Get local media stream first
       const stream = await navigator.mediaDevices.getUserMedia({ 
         video: true, 
         audio: true 
@@ -43,65 +44,104 @@ export function VideoCall({ sessionId, userName, onClose }: VideoCallProps) {
         localVideoRef.current.srcObject = stream;
       }
 
-      // Initialize peer with session-based ID
-      const newPeer = new Peer(`decisionhub-${sessionId}-${Date.now()}`, {
-        host: 'peerjs.com',
-        port: 443,
-        secure: true,
-        path: '/',
+      // Initialize peer without custom ID (let PeerJS generate it)
+      const newPeer = new Peer({
+        config: {
+          iceServers: [
+            { urls: 'stun:stun.l.google.com:19302' },
+            { urls: 'stun:stun1.l.google.com:19302' },
+          ]
+        }
       });
 
       newPeer.on('open', (id) => {
+        console.log('✅ Peer ID generated:', id);
         setMyPeerId(id);
-        console.log('My peer ID:', id);
+        setError('');
       });
 
-      // Handle incoming calls
+      newPeer.on('connection', (conn) => {
+        console.log('📞 Incoming connection');
+        conn.on('open', () => {
+          console.log('Connection opened');
+        });
+      });
+
       newPeer.on('call', (call) => {
-        console.log('Incoming call from:', call.peer);
+        console.log('📞 Incoming call from:', call.peer);
         call.answer(localStreamRef.current!);
         
         call.on('stream', (remoteStream) => {
-          console.log('Received remote stream');
+          console.log('🎥 Received remote stream');
           if (remoteVideoRef.current) {
             remoteVideoRef.current.srcObject = remoteStream;
           }
           setIsConnected(true);
         });
+
+        call.on('error', (err) => {
+          console.error('Call error:', err);
+          setError('Call error: ' + err.message);
+        });
       });
 
-      newPeer.on('error', (error) => {
-        console.error('Peer error:', error);
+      newPeer.on('error', (err) => {
+        console.error('❌ Peer error:', err);
+        setError(`Connection error: ${err.type}`);
+        
+        // Retry on error
+        if (err.type === 'network' || err.type === 'server-error') {
+          console.log('Retrying connection...');
+          setTimeout(() => initializePeer(), 2000);
+        }
+      });
+
+      newPeer.on('disconnected', () => {
+        console.log('⚠️ Disconnected, attempting to reconnect...');
+        newPeer.reconnect();
       });
 
       setPeer(newPeer);
-    } catch (error) {
-      console.error('Failed to get media:', error);
-      alert('Failed to access camera/microphone. Please allow permissions.');
+    } catch (error: any) {
+      console.error('❌ Failed to get media:', error);
+      setError('Failed to access camera/microphone. Please allow permissions.');
     }
   };
 
   const callPeer = () => {
     if (!peer || !remotePeerId || !localStreamRef.current) {
-      alert('Please enter a valid peer ID');
+      setError('Please enter a valid peer ID');
       return;
     }
 
-    console.log('Calling peer:', remotePeerId);
-    const call = peer.call(remotePeerId, localStreamRef.current);
+    console.log('📞 Calling peer:', remotePeerId);
+    setError('');
     
-    call.on('stream', (remoteStream) => {
-      console.log('Call connected, received stream');
-      if (remoteVideoRef.current) {
-        remoteVideoRef.current.srcObject = remoteStream;
-      }
-      setIsConnected(true);
-    });
+    try {
+      const call = peer.call(remotePeerId, localStreamRef.current);
+      
+      call.on('stream', (remoteStream) => {
+        console.log('🎥 Call connected, received stream');
+        if (remoteVideoRef.current) {
+          remoteVideoRef.current.srcObject = remoteStream;
+        }
+        setIsConnected(true);
+        setError('');
+      });
 
-    call.on('error', (error) => {
-      console.error('Call error:', error);
-      alert('Failed to connect. Check if the peer ID is correct.');
-    });
+      call.on('error', (err) => {
+        console.error('❌ Call error:', err);
+        setError('Failed to connect. Check if the peer ID is correct.');
+      });
+
+      call.on('close', () => {
+        console.log('Call closed');
+        setIsConnected(false);
+      });
+    } catch (err: any) {
+      console.error('Call exception:', err);
+      setError('Failed to initiate call: ' + err.message);
+    }
   };
 
   const toggleVideo = () => {
@@ -144,6 +184,13 @@ export function VideoCall({ sessionId, userName, onClose }: VideoCallProps) {
           <X size={20} />
         </Button>
       </div>
+
+      {/* Error Message */}
+      {error && (
+        <div className="bg-red-500 bg-opacity-20 border border-red-500 text-red-200 px-4 py-3 mx-4 mt-4 rounded-lg">
+          {error}
+        </div>
+      )}
 
       {/* Video Grid */}
       <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4 p-4 overflow-hidden">
@@ -199,14 +246,14 @@ export function VideoCall({ sessionId, userName, onClose }: VideoCallProps) {
               <div className="flex items-center space-x-2">
                 <input
                   type="text"
-                  value={myPeerId}
+                  value={myPeerId || 'Generating...'}
                   readOnly
                   className="flex-1 px-4 py-3 bg-gray-700 text-white rounded-lg font-mono text-sm"
-                  placeholder="Generating..."
                 />
                 <Button 
                   size="sm" 
                   onClick={copyPeerId}
+                  disabled={!myPeerId}
                   className="px-4 py-3"
                 >
                   {copied ? '✓ Copied!' : <><Copy size={16} className="mr-2" /> Copy</>}
@@ -226,6 +273,7 @@ export function VideoCall({ sessionId, userName, onClose }: VideoCallProps) {
                   onChange={(e) => setRemotePeerId(e.target.value)}
                   className="flex-1 px-4 py-3 bg-gray-700 text-white rounded-lg font-mono text-sm"
                   placeholder="Paste peer ID here..."
+                  onKeyPress={(e) => e.key === 'Enter' && callPeer()}
                 />
                 <Button 
                   onClick={callPeer} 
